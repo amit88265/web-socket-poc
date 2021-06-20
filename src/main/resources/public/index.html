@@ -1,0 +1,69 @@
+<html>
+<head>
+    <title>WebSocket</title>
+
+    <script src="resources/js/sockjs-0.3.4.js"></script>
+    <script src="resources/js/stomp.js"></script>
+
+    <script type="text/javascript">
+
+	        var stompClient = null;
+
+	        function setConnected(connected) {
+	            document.getElementById('connect').disabled = connected;
+	            document.getElementById('disconnect').disabled = !connected;
+	        }
+
+	        function connect() {
+	            var socket = new SockJS('/web-socket');
+	            stompClient = Stomp.over(socket);
+	            stompClient.connect({}, function(frame) {
+	            	setConnected(true);
+	                console.log('Connected: ' + frame);
+	                stompClient.subscribe('/topic/live-stock-price', function(messageOutput) {
+	                    showMessageOutput(JSON.parse(messageOutput.body));
+	                });
+	            });
+	        }
+
+	        function disconnect() {
+	            if(stompClient != null) {
+	                stompClient.disconnect();
+	            }
+	            setConnected(false);
+	            console.log("Disconnected");
+	        }
+
+	        function showMessageOutput(m) {
+	            document.getElementById('stock1').innerHTML=m[0].stock + ": " + m[0].price;
+	             document.getElementById('stock2').innerHTML=m[1].stock + ": " + m[1].price;
+	             document.getElementById('stock3').innerHTML=m[2].stock + ": " + m[2].price;
+	             document.getElementById('stock4').innerHTML=m[3].stock + ": " + m[3].price;
+	           document.getElementById('stock5').innerHTML=m[4].stock + ": " + m[4].price;
+	        }
+
+
+    </script>
+
+</head>
+
+<body onload="disconnect()">
+
+<div>
+    <br/>
+    <div>
+        <button id="connect" onclick="connect();">Get the live prices</button>
+        <button id="disconnect" disabled="disabled" onclick="disconnect();">Stop</button>
+    </div>
+    <br/>
+    <div>
+        <p id="stock1"></p>
+        <p id="stock2"></p>
+        <p id="stock3"></p>
+        <p id="stock4"></p>
+        <p id="stock5"></p>
+    </div>
+</div>
+
+</body>
+</html>
